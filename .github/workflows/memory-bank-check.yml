@@ -1,0 +1,43 @@
+name: Memory Bank Checks
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-memory-bank:
+    name: Validate memory-bank files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ensure required memory-bank files exist and are non-empty
+        run: |
+          set -euo pipefail
+          required=(
+            memory-bank/memory-bank.md
+            memory-bank/projectbrief.md
+            memory-bank/activeContext.md
+            memory-bank/progress.md
+          )
+          missing=()
+          for f in "${required[@]}"; do
+            if [ ! -f "$f" ]; then
+              missing+=("$f")
+            fi
+          done
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "Missing memory-bank files: ${missing[*]}"
+            exit 1
+          fi
+          if [ ! -s memory-bank/progress.md ]; then
+            echo "memory-bank/progress.md is empty"
+            exit 1
+          fi
+
+      - name: Basic repository sanity
+        run: |
+          git --version
+          echo "Repository has required memory-bank files"

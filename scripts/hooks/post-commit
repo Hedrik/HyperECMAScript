@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Post-commit hook: append a progress entry when relevant files change
+set -euo pipefail
+
+# Determine files touched by the last commit
+files=$(git diff-tree --no-commit-id --name-only -r HEAD)
+
+# Only act if relevant paths changed
+echo "$files" | grep -E '^(src/|\.github/|memory-bank/|scripts/)' >/dev/null 2>&1 || exit 0
+
+sha=$(git rev-parse --short HEAD)
+author=$(git --no-pager show -s --format='%an <%ae>' HEAD)
+date=$(git --no-pager show -s --format='%cI' HEAD)
+msg=$(git --no-pager show -s --format='%s' HEAD)
+
+entry="## $date
+- Commit: $sha ($author)
+- Message: $msg
+- Files:
+"
+
+while read -r f; do
+  entry+="  - $f
+"
+done <<<"$files"
+
+# Prepend the new entry to the existing progress file atomically
+(printf "%s
+
+" "$entry"; cat memory-bank/progress.md) | scripts/update_progress.sh
+
+# Stage and commit the updated progress.md
+git add memory-bank/progress.md
+git commit -m "Auto: update progress for commit $sha" || exit 0
+
+exit 0

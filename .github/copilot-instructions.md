@@ -34,6 +34,8 @@ Editing conventions for AI agents
 - When introducing new public symbols, document them in `memory-bank/` and add a short example in `projectbrief.md` or `activeContext.md`.
 - If you modify the manipulation model or element prototypes, include a short migration note in `progress.md` describing the reason and steps to verify behavior in a browser.
 
+- Progress updates: Agents MUST update `memory-bank/progress.md` after making changes that affect project state or documentation. Use the helper scripts in `scripts/` to perform an atomic two-phase update (write to a temp file, then rename/move into place). On Windows prefer `scripts/update_progress.ps1`, on POSIX use `scripts/update_progress.sh`.
+
 Where to leave notes for humans
 - Use the `memory-bank/` files for intent and decision records. Prefer `activeContext.md` for short-term work items and `progress.md` for verification steps.
 

@@ -9,6 +9,15 @@ The initial memory bank was created. Recent changes performed on 2025-12-25:
 - Added atomic progress update helpers: `scripts/update_progress.ps1`, `scripts/update_progress.sh`.
 - Updated `memory-bank/progress.md` with the two-phase update policy and example usage.
 
+## Verification
+- 2025-12-27: Branch protection for `main` was enabled and verified via GitHub API. Current protection summary:
+	- Required status checks: `memory-bank-check` (strict)
+	- Required approving reviews: 1
+	- Enforce admins: true
+	- Required signatures: enabled
+	- Force pushes / deletions: disabled
+
+
 
 ## Next Steps
 1. Keep `memory-bank/` files current after every change (update `progress.md`).

@@ -7,7 +7,7 @@ Thanks for contributing! This repository follows a lightweight, local-first work
 1. Clone the repo and set the tracked hooks path so hooks are versioned with the repository:
 
 ```bash
-git clone https://github.com/Hedrik/HyperECMAScript.git
+git clone https://github.com/imontage-gh-devs/HyperECMAScript.git
 cd HyperECMAScript
 git config core.hooksPath scripts/hooks
 chmod +x scripts/hooks/*

@@ -1,6 +1,6 @@
 # HyperECMAScript
 
-![Memory Bank Checks](https://github.com/Hedrik/HyperECMAScript/actions/workflows/memory-bank-check.yml/badge.svg)
+![Memory Bank Checks](https://github.com/imontage-gh-devs/HyperECMAScript/actions/workflows/memory-bank-check.yml/badge.svg)
 
 A small, browser-only ECMAScript GUI framework. Core runtime is in `src/framework.js`. The project uses a "memory bank" of markdown files under `memory-bank/` to capture intent, decisions, and progress.
 

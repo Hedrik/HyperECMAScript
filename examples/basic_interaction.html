@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manipulation Framework - Basic Interaction</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      background-color: #f0f0f0;
+      overflow: hidden; /* Prevent scroll during drag */
+    }
+    .instructions {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      pointer-events: none; /* Don't interfere with selection */
+    }
+    .box {
+      width: 100px;
+      height: 100px;
+      background-color: #3498db;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      user-select: none;
+      transition: outline 0.1s;
+    }
+    .box.selected {
+      outline: 3px solid #e74c3c;
+    }
+    .manipulation-mode .box {
+      cursor: move;
+    }
+    #status {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      padding: 10px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="instructions">
+    <h1>Manipulation Framework - Basic Interaction</h1>
+    <p><strong>Press Ctrl+M</strong> to toggle Manipulation Mode.</p>
+    <ul>
+      <li><strong>Drag</strong>: Move element (Absolute position).</li>
+      <li><strong>Alt + Drag</strong>: Resize element.</li>
+      <li><strong>Shift + Drag</strong>: Duplicate element.</li>
+      <li><strong>Ctrl + Click</strong>: Multi-select elements.</li>
+    </ul>
+  </div>
+
+  <div id="box1" class="box" style="position: absolute; left: 50px; top: 250px;">Box 1</div>
+  <div id="box2" class="box" style="position: absolute; left: 200px; top: 250px; background-color: #2ecc71;">Box 2</div>
+  <div id="box3" class="box" style="position: absolute; left: 350px; top: 250px; background-color: #9b59b6;">Box 3</div>
+
+  <div id="status">Mode: Runtime</div>
+
+  <script src="../src/framework.js"></script>
+  <script>
+    // Initialize elements with the framework
+    document.getElementById('box1').initializeFramework('document');
+    document.getElementById('box2').initializeFramework('document');
+    document.getElementById('box3').initializeFramework('document');
+
+    // Update status display
+    const statusEl = document.getElementById('status');
+    const originalToggle = window.ManipulationFramework.toggleMode;
+    window.ManipulationFramework.toggleMode = function() {
+      originalToggle.apply(this);
+      statusEl.textContent = `Mode: ${this.enabled ? 'Manipulation (' + this.currentLayer + ')' : 'Runtime'}`;
+    };
+
+    // F-key status update
+    window.addEventListener('keydown', (e) => {
+      if (['F1', 'F2', 'F3'].includes(e.key)) {
+        setTimeout(() => {
+          statusEl.textContent = `Mode: ${window.ManipulationFramework.enabled ? 'Manipulation (' + window.ManipulationFramework.currentLayer + ')' : 'Runtime'}`;
+        }, 10);
+      }
+    });
+  </script>
+</body>
+</html>

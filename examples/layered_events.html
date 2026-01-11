@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manipulation Framework - Layered Events</title>
+  <style>
+    body { font-family: sans-serif; margin: 40px; }
+    .btn {
+      padding: 10px 20px;
+      background: #eee;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      display: inline-block;
+      margin: 10px;
+    }
+    #log {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>Layered Event Propagation</h1>
+  <p>This demo shows how events propagate from Element -> Layer -> Next Layer.</p>
+  
+  <div id="btn1" class="btn">Button (with its own handler)</div>
+  <div id="btn2" class="btn">Button (no handler, falls to Template layer)</div>
+  <div id="btn3" class="btn">Button (no handler, falls to Document layer)</div>
+
+  <div id="log">Event Log:<br></div>
+
+  <script src="../src/framework.js"></script>
+  <script>
+    const log = document.getElementById('log');
+    function logEvent(msg) {
+      log.innerHTML += `> ${msg}<br>`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    const mf = window.ManipulationFramework;
+
+    // 1. Element level handler
+    const btn1 = document.getElementById('btn1');
+    btn1.initializeFramework('page');
+    btn1.onclick = function(e) {
+      logEvent('Handled by Element (Button 1)');
+    };
+
+    // 2. Template level handler
+    const btn2 = document.getElementById('btn2');
+    btn2.initializeFramework('template');
+    mf.layers.template.eventHandlers.click = function(e) {
+      logEvent('Handled by Template Layer (Catch-all)');
+    };
+
+    // 3. Document level handler
+    const btn3 = document.getElementById('btn3');
+    btn3.initializeFramework('document');
+    mf.layers.document.eventHandlers.click = function(e) {
+      logEvent('Handled by Document Layer (Catch-all)');
+    };
+
+    // Note: In real runtime, the developer would call element.handleLayeredEvent(e) 
+    // from their main event loop or add listeners that call it.
+    document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        btn.handleLayeredEvent(e);
+      });
+    });
+  </script>
+</body>
+</html>

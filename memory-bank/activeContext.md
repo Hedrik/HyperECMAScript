@@ -1,29 +1,39 @@
 # Active Context
 
 ## Current Work Focus
-The current focus is on establishing the memory bank for this project. This involves creating the initial set of documentation files as described in `memory-bank.md`.
+Implementing a sophisticated prototype-based manipulation framework with layered architecture, multi-select, and full API support. This follows a comprehensive planning phase where the core architecture was shifted from a standalone framework to an `HTMLElement` prototype extension.
 
 ## Recent Changes
-The initial memory bank was created. Recent changes performed on 2025-12-25:
-- Added `.github/copilot-instructions.md` (AI agent guidance).
-- Added atomic progress update helpers: `scripts/update_progress.ps1`, `scripts/update_progress.sh`.
-- Updated `memory-bank/progress.md` with the two-phase update policy and example usage.
+- Finalized design for prototype-based manipulation framework.
+- Defined three-layer architecture: `document`, `template`, and `page`.
+- Implemented core framework in `src/framework.js`.
+- Added global keyboard shortcuts:
+    - **Ctrl + M**: Toggle Manipulation Mode.
+    - **Ctrl + C / X / V**: Copy / Cut / Paste selection.
+    - **F1 / F2 / F3**: Switch active layer.
+- Created interactive examples in `examples/` directory.
+- Designed comprehensive API for layer and element management.
+- Designed cut/copy/paste system with cross-layer support and element serialization.
+- Created implementation checkpoint to ensure continuity.
 
-## Verification
-- 2025-12-27: Branch protection for `main` was enabled and verified via GitHub API. Current protection summary:
-	- Required status checks: `memory-bank-check` (strict)
-	- Required approving reviews: 1
-	- Enforce admins: true
-	- Required signatures: enabled
-	- Force pushes / deletions: disabled
+## Implementation Checkpoint (2026-01-11)
 
+### Architecture Decisions
+- **Prototype Extension**: `HTMLElement.prototype` will be extended to provide automatic inheritance of framework capabilities.
+- **Layered Visibility**: Only the active layer is selectable/visible during manipulation mode; all layers visible in normal mode.
+- **Layer Elements**: Non-visible layer-level elements will act as intermediaries in the event propagation chain.
+- **Property System**: Elements will have `uid` (read-only), `name` (unique in layer), and `ordinal` (ordering) properties using standard ECMAScript getters/setters.
 
+### Implementation Plan
+1. **Foundation**: Implement `window.ManipulationFramework` global state and the element serialization/clipboard system.
+2. **Prototype Extensions**: Add API methods and properties to `HTMLElement.prototype`.
+3. **Layer Management**: Implement API for adding, removing, and duplicating layers.
+4. **Element Management**: Implement API for adding, removing, and duplicating elements within layers.
+5. **Event System**: Implement the layered event propagation logic (Element -> Layer -> Next Layer).
+6. **Interaction Logic**: Implement mouse/keyboard handlers for move, resize, duplicate, and multi-select.
+7. **Clipboard Operations**: Implement cut/copy/paste logic with cross-layer support.
 
 ## Next Steps
-1. Keep `memory-bank/` files current after every change (update `progress.md`).
-2. When adding public APIs or changing core behavior, update `projectbrief.md` or `activeContext.md` with rationale.
-3. Use `scripts/update_progress.*` for atomic progress writes.
-4. Continue implementing `src/framework.js` features; document major design changes in `systemPatterns.md`.
-
-## Active Decisions and Considerations
-The primary consideration is to accurately capture the information from `projectbrief.md` to create a solid foundation for the memory bank. This will ensure that future work is based on a clear and consistent understanding of the project goals.
+1. Initialize the global `ManipulationFramework` state in `src/framework.js`.
+2. Implement the serialization and clipboard foundation.
+3. Begin extending `HTMLElement.prototype`.

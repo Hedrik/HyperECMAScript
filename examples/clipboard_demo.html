@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manipulation Framework - Clipboard Demo</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    .layer-container {
+      border: 2px solid #ccc;
+      padding: 10px;
+      margin: 10px;
+      min-height: 150px;
+      background: white;
+    }
+    .box {
+      width: 80px;
+      height: 80px;
+      background: #e67e22;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 5px;
+      cursor: pointer;
+    }
+    .selected { outline: 3px solid red; }
+    #status { font-weight: bold; color: #2c3e50; margin-bottom: 10px; }
+    .controls { margin: 20px 0; }
+    button { padding: 8px 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Clipboard & Cross-Layer Demo</h1>
+  <div id="status">Mode: Runtime (Ctrl+M to toggle)</div>
+  
+  <div class="controls">
+    <button onclick="mf.copy()">Copy (Ctrl+C)</button>
+    <button onclick="mf.cut()">Cut (Ctrl+X)</button>
+    <button onclick="mf.paste('template')">Paste to Template Layer (Ctrl+V uses current)</button>
+    <button onclick="mf.switchLayer('document')">Switch to Doc (F1)</button>
+    <button onclick="mf.switchLayer('template')">Switch to Template (F2)</button>
+  </div>
+
+  <h3>Document Layer</h3>
+  <div id="doc-layer" class="layer-container">
+    <div id="item1" class="box" style="position: absolute; left: 50px; top: 300px;">Item 1</div>
+  </div>
+
+  <h3>Template Layer</h3>
+  <div id="temp-layer" class="layer-container">
+    <!-- Pasted items will appear here if target is template -->
+  </div>
+
+  <script src="../src/framework.js"></script>
+  <script>
+    const mf = window.ManipulationFramework;
+    document.getElementById('item1').initializeFramework('document');
+
+    const statusEl = document.getElementById('status');
+    const originalToggle = mf.toggleMode;
+    mf.toggleMode = function() {
+      originalToggle.apply(this);
+      updateStatus();
+    };
+    const originalSwitch = mf.switchLayer;
+    mf.switchLayer = function(l) {
+      originalSwitch.apply(this, [l]);
+      updateStatus();
+    };
+
+    function updateStatus() {
+      statusEl.textContent = `Mode: ${mf.enabled ? 'Manipulation' : 'Runtime'} | Active Layer: ${mf.currentLayer}`;
+    }
+  </script>
+</body>
+</html>

@@ -365,7 +365,8 @@
     mf.startMousePos = { x: event.clientX, y: event.clientY };
     mf.startElementPos.clear();
 
-    mf.selectedElements.forEach(el => {
+    const elementsToProcess = Array.from(mf.selectedElements);
+    elementsToProcess.forEach(el => {
       mf.startElementPos.set(el.uid, {
         left: parseInt(el.style.left) || 0,
         top: parseInt(el.style.top) || 0,
@@ -375,13 +376,19 @@
 
       if (mf.currentAction === 'duplicate') {
         const clone = el.cloneNode(true);
+        clone.style.position = 'absolute';
+        clone.style.left = el.style.left;
+        clone.style.top = el.style.top;
+        
         document.body.appendChild(clone);
         clone.initializeFramework(el.layer);
-        // Swap selection to clone
+        
         mf.selectedElements.delete(el);
         el.classList.remove('selected');
         mf.selectedElements.add(clone);
         clone.classList.add('selected');
+        
+        mf.startElementPos.set(clone.uid, mf.startElementPos.get(el.uid));
       }
     });
 
@@ -452,23 +459,12 @@
 
     mf.clipboard.elements.forEach((data, index) => {
       const el = document.createElement(data.tagName);
-      
-      // Restore attributes
       Object.entries(data.attributes).forEach(([k, v]) => el.setAttribute(k, v));
-      
-      // Restore styles
       Object.entries(data.styles).forEach(([k, v]) => el.style.setProperty(k, v));
-      
-      // Restore innerHTML
       el.innerHTML = data.innerHTML;
-      
-      // Add to document
       document.body.appendChild(el);
-      
-      // Initialize framework properties
       el.initializeFramework(targetLayer);
       
-      // Restore name (ensuring uniqueness)
       let baseName = data.frameworkProperties.name;
       let name = baseName;
       let counter = 1;
@@ -477,7 +473,6 @@
       }
       el.name = name;
 
-      // Restore event handlers
       Object.entries(data.eventHandlers).forEach(([event, code]) => {
         try {
           const fn = new Function('event', `return (${code})(event)`);
@@ -487,10 +482,8 @@
         }
       });
 
-      // Restore custom properties
       Object.entries(data.customProperties).forEach(([k, v]) => el[k] = v);
 
-      // Visual offset for paste
       if (el.style.position === 'absolute') {
         const offset = (index + 1) * 20;
         el.style.left = (parseInt(el.style.left) || 0) + offset + 'px';
@@ -500,7 +493,6 @@
       pastedElements.push(el);
     });
 
-    // Select pasted elements
     mf.selectedElements.forEach(el => el.classList.remove('selected'));
     mf.selectedElements.clear();
     pastedElements.forEach(el => {
@@ -513,7 +505,6 @@
   document.addEventListener('keydown', function(event) {
     const mf = window.ManipulationFramework;
 
-    // Toggling mode should work even when disabled
     if (event.ctrlKey && event.key.toLowerCase() === 'm') {
       event.preventDefault();
       mf.toggleMode();
@@ -539,7 +530,6 @@
       }
     }
 
-    // Layer switching with F-keys
     switch (event.key) {
       case 'F1':
         event.preventDefault();

@@ -9,7 +9,7 @@
       font-family: sans-serif;
       margin: 20px;
       background-color: #f0f0f0;
-      overflow: hidden; /* Prevent scroll during drag */
+      overflow: hidden;
     }
     .instructions {
       background: white;
@@ -17,7 +17,8 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       margin-bottom: 20px;
-      pointer-events: none; /* Don't interfere with selection */
+      position: relative;
+      z-index: 1000;
     }
     .box {
       width: 100px;
@@ -30,23 +31,26 @@
       border-radius: 4px;
       cursor: pointer;
       user-select: none;
-      transition: outline 0.1s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .box.selected {
-      outline: 3px solid #e74c3c;
-    }
-    .manipulation-mode .box {
-      cursor: move;
+      outline: 4px solid #e74c3c;
     }
     #status {
       position: fixed;
       bottom: 20px;
-      right: 20px;
+      left: 20px;
       background: #333;
       color: white;
-      padding: 10px;
+      padding: 10px 20px;
       border-radius: 4px;
+      font-weight: bold;
+      z-index: 2000;
     }
+    /* Layer visual hints */
+    [data-layer="document"] { border: 2px solid transparent; }
+    [data-layer="template"] { border: 2px dashed #2ecc71; }
+    [data-layer="page"] { border: 2px dotted #f1c40f; }
   </style>
 </head>
 <body>
@@ -55,42 +59,56 @@
     <h1>Manipulation Framework - Basic Interaction</h1>
     <p><strong>Press Ctrl+M</strong> to toggle Manipulation Mode.</p>
     <ul>
-      <li><strong>Drag</strong>: Move element (Absolute position).</li>
+      <li><strong>Drag</strong>: Move element.</li>
       <li><strong>Alt + Drag</strong>: Resize element.</li>
       <li><strong>Shift + Drag</strong>: Duplicate element.</li>
       <li><strong>Ctrl + Click</strong>: Multi-select elements.</li>
+      <li><strong>F1 / F2 / F3</strong>: Switch Layer (Document / Template / Page).</li>
     </ul>
+    <p><small>Note: In Manipulation Mode, only elements in the <em>active layer</em> are visible.</small></p>
   </div>
 
-  <div id="box1" class="box" style="position: absolute; left: 50px; top: 250px;">Box 1</div>
-  <div id="box2" class="box" style="position: absolute; left: 200px; top: 250px; background-color: #2ecc71;">Box 2</div>
-  <div id="box3" class="box" style="position: absolute; left: 350px; top: 250px; background-color: #9b59b6;">Box 3</div>
+  <div id="box1" class="box" style="position: absolute; left: 50px; top: 300px;">Box 1 (Doc)</div>
+  <div id="box2" class="box" style="position: absolute; left: 200px; top: 300px; background-color: #2ecc71;">Box 2 (Doc)</div>
+  
+  <!-- Some elements in other layers for testing -->
+  <div id="box3" class="box" style="position: absolute; left: 350px; top: 300px; background-color: #9b59b6;">Box 3 (Temp)</div>
+  <div id="box4" class="box" style="position: absolute; left: 500px; top: 300px; background-color: #f1c40f;">Box 4 (Page)</div>
 
   <div id="status">Mode: Runtime</div>
 
   <script src="../src/framework.js"></script>
   <script>
-    // Initialize elements with the framework
+    const mf = window.ManipulationFramework;
+
+    // Initialize elements
     document.getElementById('box1').initializeFramework('document');
     document.getElementById('box2').initializeFramework('document');
-    document.getElementById('box3').initializeFramework('document');
+    document.getElementById('box3').initializeFramework('template');
+    document.getElementById('box4').initializeFramework('page');
 
-    // Update status display
     const statusEl = document.getElementById('status');
-    const originalToggle = window.ManipulationFramework.toggleMode;
-    window.ManipulationFramework.toggleMode = function() {
+    
+    function updateUI() {
+      statusEl.textContent = `Mode: ${mf.enabled ? 'MANIPULATION' : 'Runtime'} | Active Layer: ${mf.currentLayer.toUpperCase()}`;
+      statusEl.style.backgroundColor = mf.enabled ? '#e74c3c' : '#333';
+    }
+
+    // Wrap framework methods to update our local UI
+    const originalToggle = mf.toggleMode;
+    mf.toggleMode = function() {
       originalToggle.apply(this);
-      statusEl.textContent = `Mode: ${this.enabled ? 'Manipulation (' + this.currentLayer + ')' : 'Runtime'}`;
+      updateUI();
     };
 
-    // F-key status update
-    window.addEventListener('keydown', (e) => {
-      if (['F1', 'F2', 'F3'].includes(e.key)) {
-        setTimeout(() => {
-          statusEl.textContent = `Mode: ${window.ManipulationFramework.enabled ? 'Manipulation (' + window.ManipulationFramework.currentLayer + ')' : 'Runtime'}`;
-        }, 10);
-      }
-    });
+    const originalSwitch = mf.switchLayer;
+    mf.switchLayer = function(layer) {
+      originalSwitch.apply(this, [layer]);
+      updateUI();
+    };
+
+    // Initial UI update
+    updateUI();
   </script>
 </body>
 </html>

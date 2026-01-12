@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manipulation Framework - Layered Events</title>
+  <style>
+    body { font-family: sans-serif; margin: 40px; background: #fafafa; }
+    .instructions { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .btn {
+      padding: 15px 25px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-block;
+      margin: 10px;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn:hover { background: #2980b9; }
+    #log {
+      margin-top: 30px;
+      padding: 15px;
+      background: #333;
+      color: #2ecc71;
+      border-radius: 8px;
+      height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', Courier, monospace;
+      line-height: 1.4;
+    }
+    h1 { color: #2c3e50; }
+  </style>
+</head>
+<body>
+  <div class="instructions">
+    <h1>Layered Event Propagation Demo</h1>
+    <p>This demo illustrates how events propagate through the framework hierarchy: 
+       <strong>Element &rarr; Layer &rarr; Next Layer &rarr; Document</strong>.</p>
+    <p>Click the buttons below to see where the event is handled. Open the console to see more details.</p>
+  </div>
+  
+  <button id="btn1" class="btn">Button (Element Handler)</button>
+  <button id="btn2" class="btn">Button (Template Layer Handler)</button>
+  <button id="btn3" class="btn">Button (Document Layer Handler)</button>
+
+  <div id="log">--- EVENT LOG START ---<br></div>
+
+  <script src="../src/framework.js"></script>
+  <script>
+    const log = document.getElementById('log');
+    function logEvent(msg) {
+      const time = new Date().toLocaleTimeString();
+      log.innerHTML += `[${time}] > ${msg}<br>`;
+      log.scrollTop = log.scrollHeight;
+      console.log(`[Framework Event] ${msg}`);
+    }
+
+    const mf = window.ManipulationFramework;
+
+    // Initialize elements in different layers
+    const btn1 = document.getElementById('btn1');
+    btn1.initializeFramework('page');
+    // Button 1 handles its own click
+    btn1.onclick = function(e) {
+      logEvent('Handled by Element Property: Button 1 (Page Layer)');
+    };
+
+    const btn2 = document.getElementById('btn2');
+    btn2.initializeFramework('template');
+    // Button 2 doesn't have an onclick, so it falls to the Template layer handler
+    mf.layers.template.eventHandlers.click = function(e) {
+      logEvent('Handled by Template Layer Catch-all (Button 2 had no handler)');
+    };
+
+    const btn3 = document.getElementById('btn3');
+    btn3.initializeFramework('document');
+    // Button 3 doesn't have an onclick, and Template layer doesn't have a click handler for it
+    // So it falls to the Document layer
+    mf.layers.document.eventHandlers.click = function(e) {
+      logEvent('Handled by Document Layer Catch-all (Propagated from Element &rarr; Template &rarr; Document)');
+    };
+
+    // Global listener to trigger the framework's layered handling
+    document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        // This is where the magic happens:
+        btn.handleLayeredEvent(e);
+      });
+    });
+  </script>
+</body>
+</html>
